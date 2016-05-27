@@ -1,0 +1,86 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>30 Day Squat Challenge</title>
+  <link rel="stylesheet" media="screen" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+<div class="counter"></div>
+<div class="month" style="text-align:center;">
+    <h2>{{ month }}<br />
+    <span style="font-size:18px">{{ year }}</span></h2><br />
+    <span id="countdown">
+        {{ sets_to_go }} sets to go <br />
+        {{ num_completed }} down <br />
+        {{ days_to_go }} days to go!<br />
+    </span>
+    {% if not hide_button %}
+    <button id="count_btn" onclick="Countdown();">GO!</button>
+    {% endif %}
+</div>
+
+<ul class="weekdays">
+  <li>Mo</li>
+  <li>Tu</li>
+  <li>We</li>
+  <li>Th</li>
+  <li>Fr</li>
+  <li>Sa</li>
+  <li>Su</li>
+</ul>
+
+<ul class="days">
+    {% for _ in range(0, spaces) %}
+        <li></li>
+    {% endfor %}
+    {% for day in days %}
+      <li><span {% if day == today %}class="active"{% endif %}>
+        {% if day in completed %}
+          <span style="color: red;">
+            <strong>X</strong>
+          </span>
+        {% else %}
+          {{ day }}
+        {% endif %}
+          </span>
+      </li>
+    {% endfor %}
+</ul>
+
+<script type="text/javascript">
+var Countdown = function() {
+    $('.counter').html("<div class='stopwatch'></div>")
+    var counter = 60;
+    var interval = setInterval(function() {
+        counter--;
+        $('.stopwatch').html(counter)
+        if (counter == 0) {
+            var set_complete = confirm("Did you complete set?");
+            if (set_complete == true) {
+                $.get('/completed').done(function (updated) {
+                    if (updated['hide'] == 'true') {
+                        $('#count_btn').hide();
+                        $('.active').html("<span style='color: red;'><strong>X</strong></span>");
+                    }
+                    $('#countdown').html(updated['sets_to_go'] + " sets to go<br />" + updated['num_completed'] + " down <br />" + updated['days_to_go'] + " days to go!<br />");
+                    $('.stopwatch').hide();
+                });
+            }
+            clearInterval(interval);
+        }
+    }, 1000);
+};
+</script>
+
+</body>
+</html>
