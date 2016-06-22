@@ -39,6 +39,8 @@ def challenge():
     else:
         completed_this_month = [day.date.day for day in complete_days if day.date.month == now.month]
         today = ChallengeDay.query.filter_by(date=date.today()).first()
+        if not today:
+            today = ChallengeDay(now, 1)
         yesterday = ChallengeDay.query.filter_by(date=date.today() - timedelta(days=1)).first()
         if yesterday:
             if yesterday.sets_to_complete != yesterday.sets_completed:
@@ -53,6 +55,8 @@ def challenge():
                     days_to_go = 30 - len(complete_days)
                 else:
                     completed_this_month.remove(today.date.day)
+        else:
+            ChallengeDay.query.delete()
     hide_button = False
     if today:
         sets_to_go = today.sets_to_complete - today.sets_completed
